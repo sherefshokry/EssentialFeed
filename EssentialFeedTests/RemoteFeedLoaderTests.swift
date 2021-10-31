@@ -90,7 +90,7 @@ class RemoteFeedLoaderTests : XCTestCase {
                              location: "Another Location",
                              imageUrl: URL(string: "www.another-url.com")!)
         
-    
+        
         let items = [item1.model,item2.model]
         expect(sut, toCompleteWith: .success(items)) {
             let jsonData = makeItemsJSON(items: [item1.json,item2.json])
@@ -99,15 +99,23 @@ class RemoteFeedLoaderTests : XCTestCase {
         
     }
     
-
+    
     
     
     // Mark: - Helpers
     
-    private func makeSUT(url : URL = URL(string: "www.essentialDeveloper.com")!) -> (sut: RemoteFeedLoader,client: HTTPClientSpy) {
+    private func makeSUT(url : URL = URL(string: "www.essentialDeveloper.com")!,_ file: StaticString = #filePath,_ line: UInt = #line) -> (sut: RemoteFeedLoader,client: HTTPClientSpy) {
         let client = HTTPClientSpy()
-        let remoteFeedLoader = RemoteFeedLoader(url: url, client: client)
-        return (remoteFeedLoader,client)
+        let sut = RemoteFeedLoader(url: url, client: client)
+        trackForMemoryLeaks(sut,file,line)
+        trackForMemoryLeaks(client,file,line)
+        return (sut,client)
+    }
+    
+    private func trackForMemoryLeaks(_ instance: AnyObject,_ file: StaticString = #filePath ,_ line: UInt = #line){
+        addTeardownBlock { [weak instance] in
+            XCTAssertNil(instance,"Instance should have been deallocated , Potential memory leak",file: file , line: line)
+        }
     }
     
     private func makeItem(id: UUID, description: String? = nil, location: String? = nil, imageUrl : URL) -> (model: FeedItem, json:[String:Any]) {
@@ -118,9 +126,9 @@ class RemoteFeedLoaderTests : XCTestCase {
             "location" : item.location ,
             "image": item.imageURL.absoluteString
         ].compactMapValues{ $0 }
-//            .reduce(into: [String:Any]()) { (acc,e) in
-//            if let value = e.value { acc[e.key] = value }
-//        }
+        //            .reduce(into: [String:Any]()) { (acc,e) in
+        //            if let value = e.value { acc[e.key] = value }
+        //        }
         
         return (item,json)
         
