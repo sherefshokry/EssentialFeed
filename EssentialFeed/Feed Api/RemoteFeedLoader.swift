@@ -8,7 +8,7 @@
 import Foundation
 
 
-public final class RemoteFeedLoader {
+public final class RemoteFeedLoader: FeedLoader{
     
     private let client : HTTPClient
     private let url : URL
@@ -17,10 +17,9 @@ public final class RemoteFeedLoader {
         case connectivity
         case invalidData
     }
-    public enum Result : Equatable{
-        case success([FeedItem])
-        case failure(Error)
-    }
+    
+    public typealias Result = LoadFeedResult
+    
     
     public init(url: URL,client : HTTPClient){
         self.client = client
@@ -28,14 +27,14 @@ public final class RemoteFeedLoader {
     }
     
     public func load(completion: @escaping (Result) -> ()){
-        client.get(from: url){ result in
-        //    guard self != nil else { return }
+        client.get(from: url){[weak self] result in
+            guard self != nil else { return }
             switch result {
             case let .success(data,response):
-                print(self)
-                completion(FeedItemsMapper.map(data, response))
+               // print(self)
+               completion(FeedItemsMapper.map(data, response))
             case .failure:
-                completion(.failure(.connectivity))
+                completion(.failure(Error.connectivity))
             }
         }
     }
@@ -44,4 +43,14 @@ public final class RemoteFeedLoader {
     
 }
 
+
+//func fetchImages() async throws -> [UIImage] {
+//do {
+//    let images = try await fetchImages()
+//    let resizedImages = try await resizeImages(images
+//    print("Fetched \(images.count) images.")
+//} catch {
+//    print("Fetching images failed with error \(error)")
+//}
+//}
 
