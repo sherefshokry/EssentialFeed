@@ -27,14 +27,7 @@ class LoadFeedFromRemoteUseCaseTests : XCTestCase {
         XCTAssertEqual(client.requestedUrls , [url])
     }
     
-    func test_load_requestDataFromUrl2(){
-        let url = URL(string: "www.essentialDeveloper.com")!
-        let (sut,client) = makeSUT(url: url)
-        
-        sut.load{_ in}
-        
-        XCTAssertEqual(client.requestedUrls , [url])
-    }
+  
     
     func test_loadTwice_requestDataFromUrlTwice(){
         let url = URL(string: "www.essentialDeveloper.com")!
